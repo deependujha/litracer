@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/deependujha/litracer/os_utils"
 	"github.com/spf13/cobra"
 )
 
@@ -11,19 +12,22 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "litracer",
 	Short: "A tool for converting Lightning AI's LitData logs to Chrome-compatible trace files",
-	Long: `litracer is a command-line utility designed to process log files generated
-by Lightning AI's LitData framework and converts them into json trace files that
-can be used to visualize the trace using Chrome tracing tools.`,
+	Long:  `A tool for converting Lightning AI's LitData logs to Chrome-compatible trace files.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Entry point for the command
-		fmt.Println("litracer: processing log files...")
-
-		// Print received arguments
-		if len(args) > 0 {
-			fmt.Println("Arguments:", args)
-		} else {
-			fmt.Println("No arguments provided.")
+		if len(args) != 1 {
+			fmt.Println("only one argument is required `litracer <log_file_path>`. But received", len(args), "arguments: ", args)
+			os.Exit(1)
 		}
+
+		fmt.Println("Arguments:", args)
+		file_path := args[0]
+		if !os_utils.DoesFileExist(file_path) {
+			fmt.Println("File does not exist:", file_path)
+			os.Exit(1)
+		}
+		fmt.Println("File exists:", file_path)
+
 	},
 }
 
