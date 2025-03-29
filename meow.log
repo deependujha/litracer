@@ -1,0 +1,18 @@
+ph: M; pid: 1000; name: process_name; args: {'name': 'Process 1'}; 
+ph: M; pid: 1000; tid: 1001; name: thread_name; args: {'name': 'Thread 1'}; 
+ph: M; pid: 1000; name: process_name; args: {'name': 'Process 1'}; 
+ph: M; pid: 1000; tid: 1002; name: thread_name; args: {'name': 'Thread 2'}; 
+ph: M; pid: 2000; name: process_name; args: {'name': 'Process 2'}; 
+ph: M; pid: 2000; tid: 2001; name: thread_name; args: {'name': 'Thread 1'}; 
+ph: M; pid: 2000; name: process_name; args: {'name': 'Process 2'}; 
+ph: M; pid: 2000; tid: 2002; name: thread_name; args: {'name': 'Thread 2'}; 
+ph: I; ts: 1743223927735672; pid: 1000; tid: 1001; name: New Thread; args: {'thread_id': 1002}; 
+ph: I; ts: 1743223927735722; pid: 2000; tid: 2001; name: New Process; args: {'process_id': 2000}; 
+ph: B; ts: 1743223927735772; pid: 1000; tid: 1001; name: Task A; 
+ph: E; ts: 1743223927735872; pid: 1000; tid: 1001; name: Task A; 
+ph: B; ts: 1743223927735822; pid: 1000; tid: 1002; name: Task B; 
+ph: E; ts: 1743223927735922; pid: 1000; tid: 1002; name: Task B; 
+ph: B; ts: 1743223927735872; pid: 2000; tid: 2001; name: Task C; 
+ph: E; ts: 1743223927735972; pid: 2000; tid: 2001; name: Task C; 
+ph: B; ts: 1743223927735922; pid: 2000; tid: 2002; name: Task D; 
+ph: E; ts: 1743223927736022; pid: 2000; tid: 2002; name: Task D; 

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/deependujha/litracer/os_utils"
+	"github.com/deependujha/litracer/parser"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +28,7 @@ var rootCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		fmt.Println("File exists:", file_path)
+		parser.ParseFile(file_path, 1)
 
 	},
 }

@@ -6,6 +6,8 @@ import (
 	"sync"
 
 	"github.com/deependujha/litracer/os_utils"
+	"github.com/deependujha/litracer/reflection_utils"
+	"github.com/deependujha/litracer/trace_event"
 )
 
 // ParseLine
@@ -32,11 +34,26 @@ func ParseLine(line string) map[string]string {
 // worker
 // This function is used to parse the lines in parallel.
 // It reads from the channel and parses the line.
-func worker(id int, lines <-chan string, wg *sync.WaitGroup) {
+func worker(worker_id int, lines <-chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
-	_ = id
+	_ = worker_id
+	tr := trace_event.TraceEvent{}
 	for line := range lines {
-		_ = ParseLine(line)
+		parsed_line := ParseLine(line)
+		// content := fmt.Sprintf("worker_id: %d; %v", worker_id, parsed_line)
+		// fmt.Println(content)
+
+		err := reflection_utils.MapToStruct(parsed_line, &tr)
+		if err != nil {
+			fmt.Println("45: Error parsing line:", err)
+			continue
+		}
+		json_data, err := tr.ToJSON()
+		if err != nil {
+			fmt.Println("45: Error parsing line:", err)
+			continue
+		}
+		fmt.Println(json_data)
 	}
 }
 
@@ -45,6 +62,8 @@ func worker(id int, lines <-chan string, wg *sync.WaitGroup) {
 // It reads the file line by line and distributes the work to the workers.
 func ParseFile(filepath string, numWorkers int) {
 	linesChan := make(chan string, numWorkers)
+	// defer close(linesChan)
+
 	var wg sync.WaitGroup
 
 	// Start workers
@@ -58,7 +77,6 @@ func ParseFile(filepath string, numWorkers int) {
 		return
 	}
 
-	close(linesChan) // No more lines to send
-	wg.Wait()        // Wait for workers to finish
+	wg.Wait() // Wait for workers to finish
 
 }
