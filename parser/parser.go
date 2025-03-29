@@ -22,7 +22,7 @@ func ParseLine(line string) map[string]string {
 	for _, pair := range pairs {
 		kv := strings.SplitN(pair, ":", 2)
 		if len(kv) == 2 {
-			key := strings.TrimSpace(kv[0])
+			key := strings.ToLower(strings.TrimSpace(kv[0]))
 			value := strings.TrimSpace(kv[1])
 			result[key] = value
 		}
