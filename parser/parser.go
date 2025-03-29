@@ -34,10 +34,11 @@ func ParseLine(line string) map[string]string {
 // worker
 // This function is used to parse the lines in parallel.
 // It reads from the channel and parses the line.
-func worker(worker_id int, lines <-chan string, wg *sync.WaitGroup) {
+func worker(worker_id int, lines <-chan string, wg *sync.WaitGroup, output_file string) {
 	defer wg.Done()
 	_ = worker_id
 	tr := trace_event.TraceEvent{}
+	first_line := true
 	for line := range lines {
 		parsed_line := ParseLine(line)
 		// content := fmt.Sprintf("worker_id: %d; %v", worker_id, parsed_line)
@@ -53,23 +54,30 @@ func worker(worker_id int, lines <-chan string, wg *sync.WaitGroup) {
 			fmt.Println("45: Error parsing line:", err)
 			continue
 		}
-		fmt.Println(json_data)
+		if first_line {
+			os_utils.AppendToFile(output_file, json_data)
+			first_line = false
+		} else {
+			os_utils.AppendToFile(output_file, ","+json_data)
+		}
 	}
 }
 
 // ParseFile
 // This function is used to parse the file.
 // It reads the file line by line and distributes the work to the workers.
-func ParseFile(filepath string, numWorkers int) {
+func ParseFile(filepath string, numWorkers int, output_file string) {
 	linesChan := make(chan string, numWorkers)
 	// defer close(linesChan)
 
 	var wg sync.WaitGroup
 
+	os_utils.WriteToFile(output_file, "{\"traceEvents\":[")
+
 	// Start workers
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
-		go worker(i, linesChan, &wg)
+		go worker(i, linesChan, &wg, output_file)
 	}
 
 	if err := os_utils.ReadFileLineByLine(filepath, linesChan); err != nil {
@@ -78,5 +86,7 @@ func ParseFile(filepath string, numWorkers int) {
 	}
 
 	wg.Wait() // Wait for workers to finish
+
+	os_utils.AppendToFile(output_file, "]}")
 
 }
