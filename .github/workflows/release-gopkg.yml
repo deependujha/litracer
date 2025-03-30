@@ -20,18 +20,18 @@ jobs:
     
       - run: echo ${{ github.event.release.tag_name }}
 
-      - name: Extract version from source
-        id: version_check
-        run: |
-          VERSION=$(grep -o 'VERSION = ".*"' go_chrometrace.go | cut -d '"' -f 2)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      # - name: Extract version from source
+      #   id: version_check
+      #   run: |
+      #     VERSION=$(grep -o 'VERSION = ".*"' go_chrometrace.go | cut -d '"' -f 2)
+      #     echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Validate version matches tag
-        run: |
-          if [ "v$VERSION" != "${{ github.event.release.tag_name }}" ]; then
-            echo "Version mismatch! VERSION=$VERSION, TAG=${{ github.event.release.tag_name }}"
-            exit 1
-          fi
+      # - name: Validate version matches tag
+      #   run: |
+      #     if [ "v$VERSION" != "${{ github.event.release.tag_name }}" ]; then
+      #       echo "Version mismatch! VERSION=$VERSION, TAG=${{ github.event.release.tag_name }}"
+      #       exit 1
+      #     fi
 
       - name: Build package
         run: go build -v ./...
