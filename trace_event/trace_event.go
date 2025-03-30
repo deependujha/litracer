@@ -6,15 +6,15 @@ import (
 
 // TraceEvent represents a trace event.
 type TraceEvent struct {
-	Name        string                 `json:"name"`
-	EventType   TraceEventType         `json:"ph"`
-	TimestampUs float64                `json:"ts"`
-	DurationUs  float64                `json:"dur,omitempty"`
-	ProcessID   int                    `json:"pid"`
-	ThreadID    *int                   `json:"tid,omitempty"`
-	Categories  string                 `json:"cat,omitempty"`
-	Args        map[string]interface{} `json:"args,omitempty"`
-	Scope       *string                `json:"s,omitempty"`
+	Name        string            `json:"name"`
+	EventType   TraceEventType    `json:"ph"`
+	TimestampUs float64           `json:"ts"`
+	DurationUs  float64           `json:"dur,omitempty"`
+	ProcessID   int               `json:"pid"`
+	ThreadID    *int              `json:"tid,omitempty"`
+	Categories  string            `json:"cat,omitempty"`
+	Args        map[string]string `json:"args,omitempty"`
+	Scope       *string           `json:"s,omitempty"`
 }
 
 func (te *TraceEvent) ToJSON() (string, error) {
@@ -34,7 +34,7 @@ func FromJSON(data string) (*TraceEvent, error) {
 	return &te, nil
 }
 
-func NewDurationBegin(name string, timestampUs float64, processID int, threadID *int, categories []string, args map[string]interface{}) TraceEvent {
+func NewDurationBegin(name string, timestampUs float64, processID int, threadID *int, categories []string, args map[string]string) TraceEvent {
 	return TraceEvent{
 		Name:        name,
 		EventType:   BEGIN,
@@ -46,7 +46,7 @@ func NewDurationBegin(name string, timestampUs float64, processID int, threadID 
 	}
 }
 
-func NewDurationEnd(name string, timestampUs float64, processID int, threadID *int, categories []string, args map[string]interface{}) TraceEvent {
+func NewDurationEnd(name string, timestampUs float64, processID int, threadID *int, categories []string, args map[string]string) TraceEvent {
 	return TraceEvent{
 		Name:        name,
 		EventType:   END,
@@ -58,7 +58,7 @@ func NewDurationEnd(name string, timestampUs float64, processID int, threadID *i
 	}
 }
 
-func NewComplete(name string, timestampUs, durationUs float64, processID int, threadID *int, categories []string, args map[string]interface{}) TraceEvent {
+func NewComplete(name string, timestampUs, durationUs float64, processID int, threadID *int, categories []string, args map[string]string) TraceEvent {
 	return TraceEvent{
 		Name:        name,
 		EventType:   COMPLETE,
@@ -86,7 +86,7 @@ func NewProcessName(processID int, processName string) TraceEvent {
 	return TraceEvent{
 		Name:        "process_name",
 		ProcessID:   processID,
-		Args:        map[string]interface{}{"name": processName},
+		Args:        map[string]string{"name": processName},
 		EventType:   METADATA,
 		TimestampUs: 0,
 	}
@@ -99,7 +99,7 @@ func NewThreadName(processID int, threadID int, threadName string) TraceEvent {
 		ThreadID:    &threadID,
 		EventType:   METADATA,
 		TimestampUs: 0,
-		Args:        map[string]interface{}{"name": threadName},
+		Args:        map[string]string{"name": threadName},
 	}
 }
 
