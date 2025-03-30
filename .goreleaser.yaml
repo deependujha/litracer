@@ -38,6 +38,16 @@ archives:
       - goos: windows
         formats: [zip]
 
+nfpms:
+- maintainer: Deependu Jha <deependujha21@gmail.com>
+  description: A tool for converting Lightning AI's LitData logs to Chrome-compatible trace files
+  homepage: https://github.com/deependujha/litracer
+  license: MIT
+  formats:
+  - deb
+  - rpm
+  - apk
+
 changelog:
   sort: asc
   filters:
