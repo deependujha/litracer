@@ -29,6 +29,8 @@ func MapToStruct(data map[string]string, target interface{}) error {
 				convertedValue, err := ConvertToType(mapValue, fieldValue.Type())
 				if err == nil {
 					fieldValue.Set(convertedValue)
+					// Remove the key from the map after processing
+					delete(data, fieldName)
 				} else {
 					fmt.Printf("Warning: Failed to convert field %s. Map value type: %T, Struct field type: %v. Error: %v\n", fieldName, mapValue, fieldValue.Type(), err)
 				}
@@ -36,6 +38,14 @@ func MapToStruct(data map[string]string, target interface{}) error {
 
 		}
 
+	}
+
+	// Handle remaining keys in data
+	// Any keys left in the 'data' map after processing the struct fields
+	// will be added to the 'Args' field of the target struct, if it exists
+	argsField := targetValue.FieldByName("Args")
+	if argsField.IsValid() && argsField.CanSet() && argsField.Type() == reflect.TypeOf(map[string]string{}) {
+		argsField.Set(reflect.ValueOf(data))
 	}
 	return nil
 }
