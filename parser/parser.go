@@ -41,6 +41,12 @@ func worker(worker_id int, lines <-chan string, wg *sync.WaitGroup, output_file 
 	first_line := true
 	for line := range lines {
 		parsed_line := ParseLine(line)
+
+		// If the 'ph' key is missing, skip processing this line.
+		if _, ok := parsed_line["ph"]; !ok {
+			continue
+		}
+
 		// content := fmt.Sprintf("worker_id: %d; %v", worker_id, parsed_line)
 		// fmt.Println(content)
 
