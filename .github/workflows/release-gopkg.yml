@@ -1,0 +1,41 @@
+name: Release Go pkg
+
+# https://help.github.com/en/actions/reference/events-that-trigger-workflows
+on: # Trigger the workflow on push or pull request, but only for the main branch
+  release:
+    types: [published]
+
+# based on https://github.com/pypa/gh-action-pypi-publish
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.0'
+    
+      - run: echo ${{ github.event.release.tag_name }}
+
+      - name: Extract version from source
+        id: version_check
+        run: |
+          VERSION=$(grep -o 'VERSION = ".*"' go_chrometrace.go | cut -d '"' -f 2)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Validate version matches tag
+        run: |
+          if [ "v$VERSION" != "${{ github.event.release.tag_name }}" ]; then
+            echo "Version mismatch! VERSION=$VERSION, TAG=${{ github.event.release.tag_name }}"
+            exit 1
+          fi
+
+      - name: Build package
+        run: go build -v ./...
+
+      - name: Publish distribution 📦 to pkg.go.dev
+        if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
+        run: GOPROXY=proxy.golang.org go list -m github.com/deependujha/litracer@${{ github.event.release.tag_name }}
