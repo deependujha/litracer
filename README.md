@@ -12,10 +12,10 @@ A tool for converting Lightning AI's LitData logs to Chrome-compatible trace fil
 ⚡ ~ uname -m # displays machine hardware name
 # lightning-studio: x86_64
 
-# download relevant release
-⚡ ~ wget https://github.com/deependujha/litracer/releases/download/v0.0.4/litracer_0.0.4_linux_amd64.deb
+# download relevant release (prefer latest version)
+⚡ ~ wget https://github.com/deependujha/litracer/releases/download/v0.0.4/litracer_0.0.6_linux_amd64.deb
 
-⚡ ~ sudo dpkg -i litracer_0.0.4_linux_amd64.deb
+⚡ ~ sudo dpkg -i litracer_0.0.6_linux_amd64.deb
 ```
 
 - Download using go
