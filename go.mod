@@ -1,6 +1,6 @@
 module github.com/deependujha/litracer
 
-go 1.23.5
+go 1.22
 
 require github.com/spf13/cobra v1.9.1
 
