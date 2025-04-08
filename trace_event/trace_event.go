@@ -13,7 +13,7 @@ type TraceEvent struct {
 	ProcessID   int               `json:"pid"`
 	ThreadID    *int              `json:"tid,omitempty"`
 	Categories  string            `json:"cat,omitempty"`
-    Cname       string            `json:"cname,omitempty"`
+	Cname       string            `json:"cname,omitempty"`
 	Args        map[string]string `json:"args,omitempty"`
 	Scope       *string           `json:"s,omitempty"`
 }
