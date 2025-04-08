@@ -1,6 +1,8 @@
-# litracer
+# Litracer
 
 A tool for converting Lightning AI's LitData logs to Chrome-compatible trace files.
+
+<img width="1439" alt="Screenshot 2025-04-08 at 12 35 15 PM" src="https://github.com/user-attachments/assets/cfa919c8-2ba2-4a7a-b054-d94ccb3e15b1" />
 
 ---
 
