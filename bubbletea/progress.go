@@ -31,7 +31,7 @@ func StartProgressBar(totalItems int, itemChan chan int) bool {
 			p.Send(itemMsg(val))
 		}
 		time.Sleep(1 * time.Second) // wait for a second before quitting for progress bar to finish
-		p.Send(tea.Quit()) // gracefully shut down after duration
+		p.Send(tea.Quit())          // gracefully shut down after duration
 	}()
 
 	if _, err := p.Run(); err != nil {
