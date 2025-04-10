@@ -8,6 +8,7 @@ import (
 	"github.com/deependujha/litracer/os_utils"
 	"github.com/deependujha/litracer/reflection_utils"
 	"github.com/deependujha/litracer/trace_event"
+	"github.com/deependujha/litracer/trace_writer"
 )
 
 // ParseLine
@@ -34,21 +35,19 @@ func ParseLine(line string) map[string]string {
 // worker
 // This function is used to parse the lines in parallel.
 // It reads from the channel and parses the line.
-func worker(worker_id int, lines <-chan string, wg *sync.WaitGroup, output_file string, parsedLinesChan chan int) {
+func worker(worker_id int, lines <-chan trace_writer.JsonContent, wg *sync.WaitGroup, parsedLinesChan chan int, parsedJsonChan chan trace_writer.JsonContent) {
 	defer wg.Done()
 	_ = worker_id
 	tr := trace_event.TraceEvent{}
-	first_line := true
+
 	for line := range lines {
-		parsed_line := ParseLine(line)
+		parsed_line := ParseLine(line.Content)
 		parsedLinesChan <- 1 // Send the number of lines parsed to the channel
 		// If the 'ph' key is missing, skip processing this line.
 		if _, ok := parsed_line["ph"]; !ok {
+			parsedJsonChan <- trace_writer.JsonContent{LineNo: line.LineNo, Content: ""}
 			continue
 		}
-
-		// content := fmt.Sprintf("worker_id: %d; %v", worker_id, parsed_line)
-		// fmt.Println(content)
 
 		err := reflection_utils.MapToStruct(parsed_line, &tr)
 		if err != nil {
@@ -57,35 +56,33 @@ func worker(worker_id int, lines <-chan string, wg *sync.WaitGroup, output_file 
 		}
 		json_data, err := tr.ToJSON()
 		if err != nil {
-			fmt.Println("45: Error parsing line:", err)
+			fmt.Println("Error parsing line to json:", err)
 			continue
 		}
-		if first_line {
-			os_utils.AppendToFile(output_file, json_data)
-			first_line = false
-		} else {
-			os_utils.AppendToFile(output_file, ","+json_data)
-		}
+		parsedJsonChan <- trace_writer.JsonContent{LineNo: line.LineNo, Content: json_data}
 	}
 }
 
 // ParseFile
 // This function is used to parse the file.
 // It reads the file line by line and distributes the work to the workers.
-func ParseFile(filepath string, numWorkers int, output_file string, parsedLinesChan chan int) {
-	defer close(parsedLinesChan)
+func ParseFile(filepath string, numWorkers int, sinkLimit int, output_file string, parsedLinesCountChan chan int) {
+	defer close(parsedLinesCountChan)
 
-	linesChan := make(chan string, numWorkers)
-	// defer close(linesChan)
+	linesChan := make(chan trace_writer.JsonContent)
+	parsedJsonChan := make(chan trace_writer.JsonContent)
 
 	var wg sync.WaitGroup
 
+	// delete the output file if it exists
+	os_utils.DeleteFile(output_file)
 	os_utils.WriteToFile(output_file, "{\"traceEvents\":[")
+	go trace_writer.TraceWriter(output_file, sinkLimit, parsedJsonChan)
 
 	// Start workers
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
-		go worker(i, linesChan, &wg, output_file, parsedLinesChan)
+		go worker(i, linesChan, &wg, parsedLinesCountChan, parsedJsonChan)
 	}
 
 	if err := os_utils.ReadFileLineByLine(filepath, linesChan); err != nil {
@@ -94,6 +91,7 @@ func ParseFile(filepath string, numWorkers int, output_file string, parsedLinesC
 	}
 
 	wg.Wait() // Wait for workers to finish
+	close(parsedJsonChan)
 
 	os_utils.AppendToFile(output_file, "]}")
 
