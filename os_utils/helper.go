@@ -4,6 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 // DoesFileExist checks if a file exists and is not a directory
@@ -64,4 +67,38 @@ func AppendToFile(filepath, data string) error {
 	}
 
 	return nil
+}
+
+// uses `wc -l` to count the number of lines in a file
+func GetNumberOfLines(filepath string, ch chan NumberOfLinesAndError) {
+	cmd := exec.Command("wc", "-l", filepath)
+	output, err := cmd.Output()
+
+	if err != nil {
+		ch <- NumberOfLinesAndError{0, err}
+		return
+	}
+	// expected output: "  1234 filename.txt"
+	// split by space and take the first part and convert to int
+	// trim the output to remove leading and trailing spaces
+	// and split by space
+	trimmed_output := strings.TrimSpace(string(output))
+
+	splitted_trimmed_output := strings.Split(trimmed_output, " ")
+	var numLines int
+	if len(splitted_trimmed_output) > 1 {
+		numLines, err = strconv.Atoi(strings.TrimSpace(splitted_trimmed_output[0]))
+		if err != nil {
+			ch <- NumberOfLinesAndError{0, err}
+			return
+		}
+		ch <- NumberOfLinesAndError{numLines, nil}
+		return
+	} else {
+		ch <- NumberOfLinesAndError{
+			0,
+			fmt.Errorf("unexpected output format for `wc -l file.txt`. Expected: '  1234 filename.txt', got: '%s'", trimmed_output),
+		}
+		return
+	}
 }
