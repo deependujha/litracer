@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/deependujha/litracer/bubbletea"
 	"github.com/deependujha/litracer/os_utils"
-	"github.com/deependujha/litracer/parser"
+
+	// "github.com/deependujha/litracer/parser"
 	"github.com/spf13/cobra"
 )
 
@@ -31,9 +33,8 @@ var rootCmd = &cobra.Command{
 			fmt.Println("File does not exist:", log_file_path)
 			os.Exit(1)
 		}
-
-		parser.ParseFile(log_file_path, numWorkers, outputFilepath)
-
+		fmt.Println() // Print a new line for better readability
+		bubbletea.Run(log_file_path, numWorkers, outputFilepath)
 	},
 }
 
