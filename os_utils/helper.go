@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/deependujha/litracer/trace_writer"
 )
 
 // DoesFileExist checks if a file exists and is not a directory
@@ -28,7 +30,7 @@ func ReadFile(filepath string) (string, error) {
 }
 
 // ReadFileLineByLine reads a file line by line and returns a slice of strings
-func ReadFileLineByLine(filepath string, ch chan string) error {
+func ReadFileLineByLine(filepath string, ch chan trace_writer.JsonContent) error {
 	defer close(ch)
 
 	file, err := os.Open(filepath)
@@ -38,8 +40,10 @@ func ReadFileLineByLine(filepath string, ch chan string) error {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	idx := 1
 	for scanner.Scan() {
-		ch <- scanner.Text()
+		ch <- trace_writer.JsonContent{LineNo: idx, Content: scanner.Text()}
+		idx++
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -52,6 +56,17 @@ func ReadFileLineByLine(filepath string, ch chan string) error {
 // WriteToFile writes data to a file, overwriting it if it exists
 func WriteToFile(filepath, data string) error {
 	return os.WriteFile(filepath, []byte(data), 0644)
+}
+
+// DeleteFile deletes a file if it exists
+func DeleteFile(filepath string) error {
+	if DoesFileExist(filepath) {
+		err := os.Remove(filepath)
+		if err != nil {
+			return fmt.Errorf("failed to delete file: %w", err)
+		}
+	}
+	return nil
 }
 
 // AppendToFile appends data to an existing file or creates it if it doesn't exist

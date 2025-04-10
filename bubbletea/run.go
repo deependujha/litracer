@@ -5,12 +5,13 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/deependujha/litracer/litparser"
 	"github.com/deependujha/litracer/os_utils"
 )
 
-func Run(log_file_path string, numWorkers int, outputFilepath string) {
+func Run(log_file_path string, numWorkers int, sinkLimit int, outputFilepath string) {
 	// Print the details of the file and the number of workers
 	worker_emoji := workerEmoji()
 
@@ -48,19 +49,25 @@ loop:
 	}
 	fmt.Print("\r\033[K")
 	number_of_lines_log := fmt.Sprintf("\t📄 Number of lines in the log file: %d\n", numberOfLines)
-	fmt.Println(GREEN + number_of_lines_log + RESET)
-	start(log_file_path, numWorkers, outputFilepath, numberOfLines)
+	fmt.Println(CYAN + number_of_lines_log + RESET)
 
-	fmt.Println("✅ Parsing completed.")
-	fmt.Printf("⚡️ Use " + RED + "chrome://tracing" + RESET + " or " + RED + "ui.perfetto.dev " + RESET + "to view the trace file: " + YELLOW + outputFilepath + RESET + "\n")
+	time_start := time.Now()
+	startParsing(log_file_path, numWorkers, sinkLimit, outputFilepath, numberOfLines)
+	time_end := time.Now()
+	elapsed := time_end.Sub(time_start)
+	elapsed_time := fmt.Sprintf("\t⏱️  Time taken to parse the log file: %s", elapsed)
+	fmt.Println(GREEN + elapsed_time + RESET)
+
+	fmt.Println(GRAY + "\t✅ Parsing done." + RESET)
+	fmt.Printf("\n⚡️ Use " + RED + "chrome://tracing" + RESET + " or " + RED + "ui.perfetto.dev " + RESET + "to view the trace file: " + YELLOW + outputFilepath + RESET + "\n")
 }
 
-func start(log_file_path string, numWorkers int, outputFilepath string, numberOfLines int) {
+func startParsing(log_file_path string, numWorkers int, sinkLimit int, outputFilepath string, numberOfLines int) {
 	// start progress bar
-	parsedLinesChan := make(chan int) // channel to send number of lines parsed
+	parsedLinesCountChan := make(chan int) // channel to send number of lines parsed
 
-	go litparser.ParseFile(log_file_path, numWorkers, outputFilepath, parsedLinesChan)
-	StartProgressBar(numberOfLines, parsedLinesChan)
+	go litparser.ParseFile(log_file_path, numWorkers, sinkLimit, outputFilepath, parsedLinesCountChan)
+	StartProgressBar(numberOfLines, parsedLinesCountChan)
 
 }
 
