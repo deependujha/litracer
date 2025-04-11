@@ -43,5 +43,6 @@ Usage:
 Flags:
   -h, --help            help for litracer
   -o, --output string   Path to the output trace file (default "litdata_trace.json")
+  -s, --sink int        Sink limit: number of lines to write at once (default 100)
   -w, --workers int     Number of worker goroutines to use for parsing (default 1)
 ```
